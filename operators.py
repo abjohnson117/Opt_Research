@@ -32,6 +32,7 @@ def blur_operator(org, reshape=True, shape=(3,3), sigma=0.5, mode="nearest"):
             h /= sumh
         return h
 
+    #TODO: Add additive noise component
     psf = fspecial(shape,sigma)
     blurred = correlate(org, psf, mode=mode)
     return blurred.T
