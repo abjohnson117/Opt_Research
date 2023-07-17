@@ -46,9 +46,9 @@ def dctshift(psf, center=(4,4)):
     m, n = psf.shape[0], psf.shape[1]
     i = center[0]
     j = center[1]
-    k = min([i-1,m-i,j-1,n-j])
+    k = min([i,m-i,j,n-j])
 
-    PP = psf[i-k:i+k,j-k:j+k]
+    PP = psf[i-(k):i+(k+1),j-(k):j+(k+1)]
     Z1 = np.diag(np.ones(k+1), k)
     Z2 = np.diag(np.ones(k), k+1)
 
@@ -58,20 +58,10 @@ def dctshift(psf, center=(4,4)):
 
     return Ps
 
-def evals_blur(m, shape=(9,9), sigma=1):
-    n = m
-    R = np.zeros((m**2,m**2))
-    psf = fspecial(shape, sigma)
-    for i in range(m):
-        for j in range(n):
-            if j >= 1:
-                break
-            original_pixel = np.zeros((m,m))
-            original_pixel[i,j] = 1
-            blurred_pixel = convolve(original_pixel,psf,mode="constant",cval=0.0)
-            R[i*n+j,:] = blurred_pixel.flatten()
-        break
-    #The resulting R matrix will be symmetric, so we can do a discrete cosine transform
-    return R
+def evals_blur(psf, shape=(9,9), sigma=1):
+    a1 = dctshift(psf)
+    
+
+
 def grad(x):
     return 2*(ATA@x)
