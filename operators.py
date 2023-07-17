@@ -43,6 +43,7 @@ def blur_operator(org, reshape=True, shape=(9,9), sigma=1, mode="nearest"):
     return blurred
 
 def dctshift(psf, center=(4,4)):
+    """Taken from Deblurring Images to compute first column of A  matrix"""
     m, n = psf.shape[0], psf.shape[1]
     i = center[0]
     j = center[1]
@@ -58,9 +59,16 @@ def dctshift(psf, center=(4,4)):
 
     return Ps
 
-def evals_blur(psf, shape=(9,9), sigma=1):
+def evals_blur(psf):
+    """Calculates eigenvalues according to equation in Deblurring Images"""
     a1 = dctshift(psf)
     
+    e1 = np.zeros_like(a1)
+    e1[0,0] = 1
+
+    S = dct(dct(a1, axis=0), axis=1) / dct(dct(e1,axis=0), axis=1)
+    #TODO: CHECK THIS
+    return S
 
 
 def grad(x):
