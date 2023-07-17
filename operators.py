@@ -42,6 +42,22 @@ def blur_operator(org, reshape=True, shape=(9,9), sigma=1, mode="nearest"):
     
     return blurred
 
+def dctshift(psf, center=(4,4)):
+    m, n = psf.shape[0], psf.shape[1]
+    i = center[0]
+    j = center[1]
+    k = min([i-1,m-i,j-1,n-j])
+
+    PP = psf[i-k:i+k,j-k:j+k]
+    Z1 = np.diag(np.ones(k+1), k)
+    Z2 = np.diag(np.ones(k), k+1)
+
+    PP = Z1@PP@Z1.T + Z1@PP@Z2.T + Z2@PP@Z1.T + Z2@PP@Z2.T 
+    Ps = np.zeros((m,n))
+    Ps[0:2*k+1,0:2*k+1] = PP
+
+    return Ps
+
 def evals_blur(m, shape=(9,9), sigma=1):
     n = m
     R = np.zeros((m**2,m**2))
