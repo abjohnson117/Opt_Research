@@ -10,7 +10,7 @@ def max_function(x, num_compare):
 def prox_op(x,lambd):
     return np.sign(x)*max_function(np.abs(x)-lambd,0)
 
-def wavelet_operator(orig):
+def wavelet_operator(orig,m):
     coeffs = pywt.wavedec2(orig, wavelet="haar", level=3)
     wav_x, _ = pywt.coeffs_to_array(coeffs)
     wav_x = wav_x[0:m,0:m]
@@ -39,7 +39,7 @@ def fspecial(shape=(3,3),sigma=0.5):
 def blur_operator(org, reshape=True, shape=(9,9), sigma=1, mode="reflect"):
     if reshape:
         m = int(np.sqrt(org.shape[0]))
-        org = np.reshape(org, (m,m))
+        org = np.reshape(org, (m,m), order="F")
 
     psf = fspecial(shape,sigma)
     blurred = correlate(org, psf, mode=mode)
@@ -50,6 +50,20 @@ def blur_operator(org, reshape=True, shape=(9,9), sigma=1, mode="reflect"):
         blurred = blurred.flatten("F")
     
     return blurred
+
+def blur_adjoint(org, reshape=True, shape=(9,9), sigma=1, mode="reflect"):
+    if reshape:
+        m = int(np.sqrt(org.shape[0]))
+        org = np.reshape(org, (m,m), order="F")
+
+    psf = fspecial(shape, sigma)
+    psf = np.flipud(np.fliplr(psf))
+    adjoint_blurred = correlate(org, psf, mode=mode)
+    adjoint_blurred = adjoint_blurred.T
+    if reshape:
+        adjoint_blurred = adjoint_blurred.flatten("F")
+
+    return adjoint_blurred
 
 def dctshift(psf, center=(4,4)):
     """Taken from Deblurring Images to compute first column of A  matrix"""
@@ -76,9 +90,8 @@ def evals_blur(psf):
     e1[0,0] = 1
 
     S = dct(dct(a1, axis=0), axis=1) / dct(dct(e1,axis=0), axis=1)
-    #TODO: CHECK THIS
     return np.max(S), S
 
 
 def grad(x,b):
-    return 
+    return 2*()
