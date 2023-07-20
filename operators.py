@@ -4,11 +4,11 @@ from scipy.ndimage import correlate, convolve
 from scipy.signal import convolve2d
 from scipy.fftpack import dct
 
-def max_function(x, num_compare):
-    return np.array([i if i >= num_compare else num_compare for i in x], dtype=float)
-
 def prox_op(x,lambd):
-    return np.sign(x)*max_function(np.abs(x)-lambd,0)
+    return np.sign(x)*np.maximum(np.abs(x)-lambd,0)
+
+def adjoint_prox_op(x,lambd):
+    return x - prox_op(x,lambd)
 
 def wavelet_operator(orig,m):
     coeffs = pywt.wavedec2(orig, wavelet="haar", level=3)
@@ -17,10 +17,16 @@ def wavelet_operator(orig,m):
     W = np.reshape(wav_x, (m**2,1))
     return W
 
-def wavelet_operator_1d(org):
-    coeffs = pywt.wavedec(org, wavelet="haar", level=2)
+def wavelet_operator_1d(org, mode="reflect"):
+    coeffs = pywt.wavedec(org, wavelet="haar", level=2, mode=mode)
     wav_x, keep = pywt.coeffs_to_array(coeffs)
-    return (wav_x,keep)
+    return wav_x, keep
+
+def adjoint_wavelet_operator_1d(wav_x, keep, mode="reflect"):
+    coeffs = pywt.array_to_coeffs(wav_x, keep, output_format='wavedec')
+    org = pywt.waverec(coeffs, wavelet="haar", mode=mode)
+    return org
+
 
 def fspecial(shape=(3,3),sigma=0.5):
     """
@@ -43,7 +49,6 @@ def blur_operator(org, reshape=True, shape=(9,9), sigma=1, mode="reflect"):
 
     psf = fspecial(shape,sigma)
     blurred = correlate(org, psf, mode=mode)
-    # blurred = convolve2d(org, psf, mode="same", boundary=boundary)
     # blurred += np.random.normal(0,1e-4,size=(m,m)) #TODO: Add this separately
     blurred = blurred.T
     if reshape:
@@ -94,4 +99,7 @@ def evals_blur(psf):
 
 
 def grad(x,b):
-    return 2*()
+    return (blur_adjoint(blur_operator(x)) - blur_adjoint(b))
+
+def adjoint_grad(y, b):
+    return (blur_adjoint(blur_operator(y)) - blur_adjoint(b))
