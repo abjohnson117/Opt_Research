@@ -42,7 +42,7 @@ def fspecial(shape=(3,3),sigma=0.5):
         h /= sumh
     return h
 
-def blur_operator(org, reshape=True, shape=(9,9), sigma=1, mode="reflect"):
+def blur_operator(org, reshape=True, shape=(9,9), sigma=4, mode="reflect"):
     if reshape:
         m = int(np.sqrt(org.shape[0]))
         org = np.reshape(org, (m,m), order="F")
@@ -56,7 +56,7 @@ def blur_operator(org, reshape=True, shape=(9,9), sigma=1, mode="reflect"):
     
     return blurred
 
-def blur_adjoint(org, reshape=True, shape=(9,9), sigma=1, mode="reflect"):
+def blur_adjoint(org, reshape=True, shape=(9,9), sigma=4, mode="reflect"):
     if reshape:
         m = int(np.sqrt(org.shape[0]))
         org = np.reshape(org, (m,m), order="F")
